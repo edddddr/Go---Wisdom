@@ -28,8 +28,9 @@ func main(){
 
 
 	// fmt.Println(add(10, 10))
-
+	
 	// fmt.Println(swap("hello", "worlds"))
-	fmt.Println(split(17))
+	
+	fmt.Println(split(10))
 
 }
