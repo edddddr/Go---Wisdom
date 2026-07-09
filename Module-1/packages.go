@@ -8,10 +8,10 @@ import (
 
 
 
-func main() {
+func run() {
    
    
-   fmt.Println("My favorait number is : ", rand.Intn(5))
+   fmt.Println("My favorite number is : ", rand.Intn(5))
    fmt.Println(math.Pi)
 
 
