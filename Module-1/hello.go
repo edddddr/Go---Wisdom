@@ -1,23 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
-func my_fisrt() string {
-	return "hello"
-	}
 
 
 func main() {
-   /* This is my first sample program. */
+   
+   
+   fmt.Println("My favorait number is : ", rand.Intn(5))
 
-   var result string
-   fmt.Println("Adios Mucho gutso !")
-
-
-   result = my_fisrt()
-
-
-   fmt.Println(result)
+   
 }	
 
 
