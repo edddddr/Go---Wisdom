@@ -1,7 +1,7 @@
-package main
+// package main
 
 
-import "fmt"
+// import "fmt"
 
 
 // func add(x, y int) int {
@@ -16,21 +16,21 @@ import "fmt"
 
 
 
-func split(sum int) (x,y int){
-	x = sum * 4/5
-	y = sum - x
-	return
-}
+// func split(sum int) (x,y int){
+// 	x = sum * 4/5
+// 	y = sum - x
+// 	return
+// }
 
 
 
-func main(){
+// func main(){
 
 
 	// fmt.Println(add(10, 10))
 	
 	// fmt.Println(swap("hello", "worlds"))
 	
-	fmt.Println(split(10))
+	// fmt.Println(split(10))
 
-}
+// }
