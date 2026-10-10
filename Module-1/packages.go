@@ -1,21 +1,21 @@
-package main
+// package main
 
-import (
-	"fmt"
-	"math/rand"
-	"math"
-)
+// import (
+// 	"fmt"
+// 	"math/rand"
+// 	"math"
+// )
 
 
 
-func run() {
+// func run() {
    
    
-   fmt.Println("My favorite number is : ", rand.Intn(5))
-   fmt.Println(math.Pi)
+//    fmt.Println("My favorite number is : ", rand.Intn(5))
+//    fmt.Println(math.Pi)
 
 
    
-}	
+// }	
 
 
