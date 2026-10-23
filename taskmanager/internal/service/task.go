@@ -13,6 +13,7 @@ const defaultPriority = 3
 // TaskRepository is what the service NEEDS. Defined here, implemented elsewhere.
 type TaskRepository interface {
 	Create(ctx context.Context, t *domain.Task) error
+	List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)	
 }
 
 type CreateTaskInput struct {
@@ -45,4 +46,13 @@ func (s *TaskService) Create(ctx context.Context, in CreateTaskInput) (*domain.T
 		return nil, fmt.Errorf("create task: %w", err)
 	}
 	return t, nil
+}
+
+
+func (s *TaskService) List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error) {
+	tasks, err := s.repo.List(ctx, f)
+	if err != nil {
+		return nil, fmt.Errorf("list tasks: %w", err)
+	}
+	return tasks, nil
 }
