@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	// "strconv"
 
@@ -15,6 +16,7 @@ import (
 // TaskService is what the handler NEEDS from the layer below.
 type TaskService interface {
 	Create(ctx context.Context, in service.CreateTaskInput) (*domain.Task, error)
+	List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
 }
 
 type createTaskRequest struct {
@@ -50,4 +52,24 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, task)
+}
+
+
+func (h *TaskHandler) List(c *gin.Context) {
+	var filter domain.TaskFilter
+	if raw, ok := c.GetQuery("done"); ok {
+		v, err := strconv.ParseBool(raw)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "done must be true or false"})
+			return
+		}
+		filter.Done = &v
+	}
+
+	tasks, err := h.svc.List(c.Request.Context(), filter)
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, tasks)
 }
