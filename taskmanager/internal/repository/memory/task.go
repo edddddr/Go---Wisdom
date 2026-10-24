@@ -3,7 +3,6 @@ package memory
 import (
 	"context"
 	// "sort"
-	"context"
 	"sync"
 
 	"github.com/edddddr/taskmanager/internal/domain"
@@ -32,3 +31,4 @@ func (r *TaskRepository) create(ctx context.Context, t *domain.Task) error {
 
 	return nil
 }
+
