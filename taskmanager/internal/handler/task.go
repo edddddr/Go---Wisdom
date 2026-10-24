@@ -32,7 +32,7 @@ func NewTaskHandler(serv TaskRepository) *TaskHandler{
 }
 
 
-func (h *TaskHandler)  create(c *gin.Context){
+func (h *TaskHandler)  Create(c *gin.Context){
 	var req  CreateInput
 	if err := c.ShouldBindJSON(&req); err != nil{
 		c.JSON(400, gin.H{"error": err.Error()})
