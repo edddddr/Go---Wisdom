@@ -1,20 +1,20 @@
-// package config
+package config
 
-// import "os"
+import "os"
 
-// type Config struct {
-// 	Port string
-// }
+type Config struct {
+	Port string
+}
 
-// func Load() Config {
-// 	return Config{
-// 		Port: getEnv("PORT", "8080"),
-// 	}
-// }
+func Load() Config {
+	return Config{
+		Port: getEnv("PORT", "8080"),
+	}
+}
 
-// func getEnv(key, fallback string) string {
-// 	if v := os.Getenv(key); v != "" {
-// 		return v
-// 	}
-// 	return fallback
-// }
+func getEnv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
