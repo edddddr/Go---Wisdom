@@ -1,4 +1,4 @@
-// // package main
+// package main
 
 // // import (
 // // 	// "fmt"
@@ -226,28 +226,28 @@
 // // 	r.Run(":8080")
 // // }
 
-// package main
+package main
 
-// import (
-// 	"log"
+import (
+	"log"
 
-// 	"github.com/edddddr/taskmanager/internal/config"
-// 	"github.com/edddddr/taskmanager/internal/handler"
-// 	"github.com/edddddr/taskmanager/internal/repository/memory"
-// 	"github.com/edddddr/taskmanager/internal/service"
-// )
+	"github.com/edddddr/taskmanager/internal/config"
+	"github.com/edddddr/taskmanager/internal/handler"
+	"github.com/edddddr/taskmanager/internal/repository/memory"
+	"github.com/edddddr/taskmanager/internal/service"
+)
 
-// func main() {
-// 	cfg := config.Load()
+func main() {
+	cfg := config.Load()
 
-// 	repo := memory.NewTaskRepository()
-// 	svc := service.NewTaskService(repo)
-// 	taskHandler := handler.NewTaskHandler(svc)
-// 	router := handler.NewRouter(taskHandler)
+	repo := memory.NewTasRepostory()
+	svc := service.NewTasService(repo)
+	taskHandler := handler.NewTaskHandler(svc)
+	router := handler.NewTaskRouter(taskHandler)
 
-// 	if err := router.Run(":" + cfg.Port); err != nil {
-// 		log.Fatalf("server failed: %v", err)
-// 	}
-// }
+	if err := router.Run(":" + cfg.Port); err != nil {
+		log.Fatalf("server failed: %v", err)
+	}
+}
 
 
