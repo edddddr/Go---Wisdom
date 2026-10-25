@@ -16,6 +16,7 @@ type TaskRepository interface {
 	 List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
 	 Get(ctx context.Context, id int) (*domain.Task, error)
 	 Update(ctx context.Context, t *domain.Task) error
+	 Delete(ctx context.Context, id int) error
 }
 
 
@@ -112,4 +113,14 @@ func (s *TaskService) Update(ctx context.Context, id int, in UpdateInput) (*doma
 
 	return t, nil
 
+}
+
+func (s *TaskService) Delete(ctx context.Context, id int) error {
+	err := s.repo.Delete(ctx, id)
+
+	if err != nil{
+		return fmt.Errorf("delete task %d %w", id, err)
+	}
+
+	return nil
 }
