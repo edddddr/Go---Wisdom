@@ -19,6 +19,7 @@ func NewTaskRouter(task *TaskHandler) *gin.Engine {
 		t.POST("", task.Create)
 		t.GET("", task.List)
 		t.GET(":id", task.Get)
+		t.PUT(":id", task.Update)
 	}
 		
 	return r

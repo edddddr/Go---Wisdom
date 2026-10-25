@@ -24,7 +24,7 @@ type CreateInput struct{
 	Description string
 	Priority *int 
 }
-type updateInput struct{
+type UpdateInput struct{
 	Title       *string
 	Description *string
 	Priority    *int 
@@ -83,7 +83,7 @@ func (s *TaskService) Get(ctx context.Context, id int) (*domain.Task, error){
 }	
 
 
-func (s *TaskService) Update(ctx context.Context, id int, in *updateInput) (*domain.Task, error){
+func (s *TaskService) Update(ctx context.Context, id int, in UpdateInput) (*domain.Task, error){
 	t, err := s.repo.Get(ctx, id)
 	
 	if err != nil {

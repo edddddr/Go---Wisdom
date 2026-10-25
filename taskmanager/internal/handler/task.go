@@ -18,12 +18,21 @@ type TaskRepository interface{
 	Create(ctx context.Context, in service.CreateInput) (*domain.Task, error)
 	List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
 	Get(ctx context.Context, id int) (*domain.Task, error) 
+	Update(ctx context.Context, id int, in service.UpdateInput) (*domain.Task, error)
 }
 
-type CreateInput struct { 
+type CreateTaskRequest struct { 
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Priority    *int       `json:"priority"`
+}
+
+
+type UpdateTaskRequest struct { 
+	Title       *string    `json:"title"`
+	Description *string    `json:"description"`
+	Priority    *int       `json:"priority"`
+	Done        *bool      `json:"done"`
 }
 
 type TaskHandler struct {
@@ -37,7 +46,7 @@ func NewTaskHandler(serv TaskRepository) *TaskHandler{
 
 
 func (h *TaskHandler)  Create(c *gin.Context){
-	var req  CreateInput
+	var req  CreateTaskRequest
 	if err := c.ShouldBindJSON(&req); err != nil{
 		c.JSON(400, gin.H{"error": err.Error()})
 		return  
@@ -101,6 +110,32 @@ func (h *TaskHandler) Get(c *gin.Context){
 }
 
 
+func (h *TaskHandler)Update(c *gin.Context){
+	id, ok := parseID(c)
+
+	if !ok{
+		return
+	}
+
+	var req UpdateTaskRequest
+	if err := c.ShouldBind(&req); err != nil{
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	task, err := h.serv.Update(c.Request.Context(), id, service.UpdateInput{
+		Title: req.Title,
+		Description: req.Description,
+		Priority: req.Priority,
+		Done: req.Done,
+	})
+
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, task)
+}
 
 
 func parseID(c *gin.Context) (int, bool) {
@@ -111,3 +146,4 @@ func parseID(c *gin.Context) (int, bool) {
 	}
 	return id, true
 }
+
