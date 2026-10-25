@@ -15,6 +15,7 @@ type TaskRepository interface {
 	 Create(ctx context.Context, t *domain.Task) error
 	 List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
 	 Get(ctx context.Context, id int) (*domain.Task, error)
+	 Update(ctx context.Context, t *domain.Task) error
 }
 
 
@@ -22,6 +23,12 @@ type CreateInput struct{
 	Title       string
 	Description string
 	Priority *int 
+}
+type updateInput struct{
+	Title       *string
+	Description *string
+	Priority    *int 
+	Done        *bool
 }
 
 
@@ -74,3 +81,35 @@ func (s *TaskService) Get(ctx context.Context, id int) (*domain.Task, error){
 
 		return task, nil
 }	
+
+
+func (s *TaskService) Update(ctx context.Context, id int, in *updateInput) (*domain.Task, error){
+	t, err := s.repo.Get(ctx, id)
+	
+	if err != nil {
+		return nil, fmt.Errorf("get taks: %d %w", id, err)
+	}
+
+	if in.Title != nil{
+		t.Title = *in.Title
+	}
+
+	if in.Description != nil{
+		t.Description = *in.Description
+	}
+
+	if in.Priority != nil{
+		t.Priority = *in.Priority
+	}
+
+	if in.Done != nil{
+		t.Done = *in.Done
+	}
+	
+	if err := s.repo.Update(ctx, t); err != nil{
+		return nil, fmt.Errorf("update task %d %w", id, err)
+	}
+
+	return t, nil
+
+}
