@@ -14,6 +14,7 @@ const defaultPriority = 3
 type TaskRepository interface {
 	 Create(ctx context.Context, t *domain.Task) error
 	 List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
+	 Get(ctx context.Context, id int) (*domain.Task, error)
 }
 
 
@@ -62,3 +63,14 @@ func (r *TaskService) List(ctx context.Context, f domain.TaskFilter) ([]domain.T
 
 	return tasks, nil
 } 
+
+
+func (s *TaskService) Get(ctx context.Context, id int) (*domain.Task, error){
+		task, err := s.repo.Get(ctx, id)
+
+		if err != nil {
+			return nil, fmt.Errorf("get taks: %d %w", id, err)
+		}
+
+		return task, nil
+}	

@@ -3,6 +3,7 @@ package memory
 import (
 	"context"
 	"sort"
+
 	// "sort"
 	"sync"
 
@@ -50,16 +51,6 @@ func (r *TaskRepository) List(ctx context.Context, f domain.TaskFilter) ([]domai
 
 	return out, nil
 }
-
-
-
-
-
-
-
-
-
-
 
 
 func (r *TaskRepository)  Get(ctx context.Context, id int) (*domain.Task, error){
