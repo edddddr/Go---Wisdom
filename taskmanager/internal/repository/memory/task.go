@@ -64,3 +64,17 @@ func (r *TaskRepository)  Get(ctx context.Context, id int) (*domain.Task, error)
 
 	return &t, nil
 }	
+
+
+func (r *TaskRepository) Update(ctx context.Context, t *domain.Task) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, ok := r.tasks[t.ID]; !ok{
+		return domain.ErrNotFound
+	}
+	
+	r.tasks[t.ID] = *t
+	
+	return nil
+}
