@@ -17,6 +17,7 @@ import (
 type TaskRepository interface{
 	Create(ctx context.Context, in service.CreateInput) (*domain.Task, error)
 	List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
+	Get(ctx context.Context, id int) (*domain.Task, error) 
 }
 
 type CreateInput struct { 
@@ -80,4 +81,33 @@ func (h *TaskHandler) List(c *gin.Context){
 
 	c.JSON(http.StatusOK, tasks)
 
+}
+
+
+func (h *TaskHandler) Get(c *gin.Context){
+	id, ok := parseID(c)
+	
+	if !ok {
+		return
+	}
+	task, err := h.serv.Get(c.Request.Context(), id)
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, task)
+
+}
+
+
+
+
+func parseID(c *gin.Context) (int, bool) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return 0, false
+	}
+	return id, true
 }
