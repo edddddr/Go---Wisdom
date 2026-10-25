@@ -75,6 +75,21 @@ func (r *TaskRepository) Update(ctx context.Context, t *domain.Task) error {
 	}
 	
 	r.tasks[t.ID] = *t
-	
+
+	return nil
+}
+
+func (r *TaskRepository) Delete(ctx context.Context, id int) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	_, ok := r.tasks[id]
+
+	if !ok{
+		return domain.ErrNotFound
+	}
+
+	delete(r.tasks, id)
+
 	return nil
 }
