@@ -19,6 +19,7 @@ type TaskRepository interface{
 	List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
 	Get(ctx context.Context, id int) (*domain.Task, error) 
 	Update(ctx context.Context, id int, in service.UpdateInput) (*domain.Task, error)
+	Delete(ctx context.Context, id int) error 
 }
 
 type CreateTaskRequest struct { 
@@ -110,7 +111,7 @@ func (h *TaskHandler) Get(c *gin.Context){
 }
 
 
-func (h *TaskHandler)Update(c *gin.Context){
+func (h *TaskHandler) Update(c *gin.Context){
 	id, ok := parseID(c)
 
 	if !ok{
@@ -135,6 +136,24 @@ func (h *TaskHandler)Update(c *gin.Context){
 	}
 
 	c.JSON(http.StatusOK, task)
+}
+
+func (h *TaskHandler) Delete(c *gin.Context){
+	id, ok := parseID(c)
+
+	if !ok{
+		return
+	}
+
+	err := h.serv.Delete(c.Request.Context(), id)
+
+	if err != nil{
+		respondError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+
 }
 
 
