@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"net/http"
+	"strconv"
+
 	// "net/http"
 	// "strconv"
 
@@ -14,6 +16,7 @@ import (
 
 type TaskRepository interface{
 	Create(ctx context.Context, in service.CreateInput) (*domain.Task, error)
+	List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
 }
 
 type CreateInput struct { 
@@ -52,7 +55,29 @@ func (h *TaskHandler)  Create(c *gin.Context){
 
 	c.JSON(http.StatusOK, task)
 
+}
 
 
+
+func (h *TaskHandler) List(c *gin.Context){
+	var filter domain.TaskFilter 
+
+	if done, ok := c.GetQuery("done"); ok {
+		v, err := strconv.ParseBool(done)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error" : "The done must be ture of false"})
+			return
+		}
+		filter.Done = &v
+	}
+
+	tasks, err := h.serv.List(c.Request.Context(), filter)
+
+	if err != nil{
+		respondError(c, err)
+		return	
+	}
+
+	c.JSON(http.StatusOK, tasks)
 
 }

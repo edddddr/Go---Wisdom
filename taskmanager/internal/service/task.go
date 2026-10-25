@@ -13,6 +13,7 @@ const defaultPriority = 3
 
 type TaskRepository interface {
 	 Create(ctx context.Context, t *domain.Task) error
+	 List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
 }
 
 
@@ -52,3 +53,12 @@ func (r *TaskService) Create(ctx context.Context, in CreateInput) (*domain.Task,
 	return t, nil
 }
 
+
+func (r *TaskService) List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error){
+	tasks, err := r.repo.List(ctx, f)
+	if err != nil {
+		return nil, fmt.Errorf("list task: %w", err)
+	} 
+
+	return tasks, nil
+} 
