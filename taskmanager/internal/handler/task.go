@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	// "net/http"
-	// "strconv"
 
 	"github.com/edddddr/taskmanager/internal/domain"
 	"github.com/edddddr/taskmanager/internal/service"
