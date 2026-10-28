@@ -43,3 +43,14 @@ func TestTaskService_Create_Priority(t *testing.T) {
 		})
 	}
 }
+
+func TestTaskService_Create_BlankTitle(t *testing.T) {
+	svc := newService()
+
+	_, err := svc.Create(context.Background(), service.CreateInput{Title: "   "})
+
+	if !errors.Is(err, domain.ErrInvalidInput) {
+		t.Errorf("err = %v, want ErrInvalidInput", err)
+	}
+}
+
