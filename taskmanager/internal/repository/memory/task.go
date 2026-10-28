@@ -66,17 +66,28 @@ func (r *TaskRepository)  Get(ctx context.Context, id int) (*domain.Task, error)
 }	
 
 
-func (r *TaskRepository) Update(ctx context.Context, t *domain.Task) error {
+func (r *TaskRepository) Update(ctx context.Context, id int, p domain.TaskPatch) (*domain.Task, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, ok := r.tasks[t.ID]; !ok{
-		return domain.ErrNotFound
+	t, ok := r.tasks[id]
+	if !ok {
+		return nil, domain.ErrNotFound
 	}
-	
-	r.tasks[t.ID] = *t
-
-	return nil
+	if p.Title != nil {
+		t.Title = *p.Title
+	}
+	if p.Description != nil {
+		t.Description = *p.Description
+	}
+	if p.Done != nil {
+		t.Done = *p.Done
+	}
+	if p.Priority != nil {
+		t.Priority = *p.Priority
+	}
+	r.tasks[id] = t
+	return &t, nil
 }
 
 func (r *TaskRepository) Delete(ctx context.Context, id int) error {

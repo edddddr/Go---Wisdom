@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"strings"
 
 	"github.com/edddddr/taskmanager/internal/domain"
 )
@@ -15,7 +16,7 @@ type TaskRepository interface {
 	 Create(ctx context.Context, t *domain.Task) error
 	 List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
 	 Get(ctx context.Context, id int) (*domain.Task, error)
-	 Update(ctx context.Context, t *domain.Task) error
+	 Update(ctx context.Context, id int, p domain.TaskPatch) (*domain.Task, error)
 	 Delete(ctx context.Context, id int) error
 }
 
@@ -37,7 +38,7 @@ type TaskService struct{
 	repo TaskRepository
 }
 
-func NewTaskService(repo TaskRepository) *TaskService {
+func NewTasService(repo TaskRepository) *TaskService {
 	return &TaskService{repo:repo}
 } 
 
@@ -85,29 +86,24 @@ func (s *TaskService) Get(ctx context.Context, id int) (*domain.Task, error){
 
 
 func (s *TaskService) Update(ctx context.Context, id int, in UpdateInput) (*domain.Task, error){
-	t, err := s.repo.Get(ctx, id)
-	
-	if err != nil {
-		return nil, fmt.Errorf("get taks: %d %w", id, err)
+	patch := domain.TaskPatch{
+		Description: in.Description,
+		Done: in.Done,
+		Priority: in.Priority,
 	}
 
-	if in.Title != nil{
-		t.Title = *in.Title
-	}
-
-	if in.Description != nil{
-		t.Description = *in.Description
-	}
-
-	if in.Priority != nil{
-		t.Priority = *in.Priority
-	}
-
-	if in.Done != nil{
-		t.Done = *in.Done
+	if in.Title != nil {
+		title := strings.TrimSpace(*in.Title)
+		if title == "" {
+			return nil, fmt.Errorf("title must not be blank: %w", domain.ErrInvalidInput)
+		}
+		patch.Title = &title
 	}
 	
-	if err := s.repo.Update(ctx, t); err != nil{
+	
+	
+	t, err := s.repo.Update(ctx, id, patch)
+	if err != nil{
 		return nil, fmt.Errorf("update task %d %w", id, err)
 	}
 

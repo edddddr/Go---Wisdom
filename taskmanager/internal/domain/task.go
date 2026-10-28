@@ -17,7 +17,16 @@ type Task struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+
+type TaskPatch struct {
+	Title *string
+	Description *string
+	Done *bool
+	Priority *int
+}
+
 // TaskFilter: nil Done means "don't filter by done".
 type TaskFilter struct {
 	Done *bool
 }
+

@@ -5,8 +5,8 @@ services:
       POSTGRES_USER: teamtasks
       POSTGRES_PASSWORD: teamtasks
       POSTGRES_DB: teamtasks
-    ports:
-      - "5432:5432"
+      ports:
+        - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
