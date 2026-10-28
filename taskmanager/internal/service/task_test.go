@@ -54,3 +54,12 @@ func TestTaskService_Create_BlankTitle(t *testing.T) {
 	}
 }
 
+func TestTaskService_Get_NotFound(t *testing.T) {
+	svc := newService()
+
+	_, err := svc.Get(context.Background(), 999)
+
+	if !errors.Is(err, domain.ErrNotFound) {
+		t.Errorf("err = %v, want ErrNotFound", err)
+	}
+}
