@@ -12,8 +12,8 @@ import (
 func main() {
 	cfg := config.Load()
 
-	repo := memory.NewTasRepostory()
-	svc := service.NewTasService(repo)
+	repo := memory.NewTaskRepostory()
+	svc := service.NewTaskService(repo)
 	taskHandler := handler.NewTaskHandler(svc)
 	router := handler.NewTaskRouter(taskHandler)
 

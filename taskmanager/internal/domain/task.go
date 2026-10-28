@@ -6,7 +6,7 @@ import (
 )
 
 var ErrNotFound = errors.New("not found")
-var ErrNotValidInput = errors.New("Invalid input")
+var ErrInvalidInput = errors.New("Invalid input")
 
 type Task struct {
 	ID          int       `json:"id"`

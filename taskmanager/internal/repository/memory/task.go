@@ -17,7 +17,7 @@ type TaskRepository struct{
 }
 
 
-func NewTasRepostory() *TaskRepository{
+func NewTaskRepostory() *TaskRepository{
 	return &TaskRepository{tasks: make(map[int]domain.Task)}
 }
 
