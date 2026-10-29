@@ -48,7 +48,7 @@ func (r *TaskService) Create(ctx context.Context, in CreateInput) (*domain.Task,
 	if in.Priority != nil {
 		priority = *in.Priority
 	}
-
+	
 	t := &domain.Task{
 		Title: in.Title,
 		Description: in.Description,
