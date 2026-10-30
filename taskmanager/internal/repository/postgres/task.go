@@ -45,7 +45,7 @@ func (r *TaskRepository) Create(ctx context.Context, t *domain.Task) error{
 	return nil
 }
 
-func (r *TaskRepository) List(ctx context.Context, f *domain.TaskFilter) ([]domain.Task, error){
+func (r *TaskRepository) List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error){
 
 	rows, err := r.pool.Query(ctx,
 	`SELECT `+taskColumns+`
@@ -113,4 +113,15 @@ func (r *TaskRepository) Update(ctx context.Context, id int, p domain.TaskPatch)
 		return nil, fmt.Errorf("update task: %w", err)
 	}
 	return &t, nil
+}
+
+func (r *TaskRepository) Delete(ctx context.Context, id int) error {
+	tag, err := r.pool.Exec(ctx, `DELETE FROM tasks WHERE id = $1`, id)
+	if err != nil {
+		return fmt.Errorf("delete task: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return domain.ErrNotFound
+	}
+	return nil
 }
