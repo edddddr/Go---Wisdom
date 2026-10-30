@@ -94,3 +94,23 @@ func (r *TaskRepository) Get(ctx context.Context, id int) (*domain.Task, error){
 	
 	return &t, nil
 }
+
+
+func (r *TaskRepository) Update(ctx context.Context, id int, p domain.TaskPatch) (*domain.Task, error){
+	t, err := scanTasks(r.pool.QueryRow(ctx, 
+	`UPDATE tasks SET
+	title = COALESCE($2, title),
+	desciption = COALESCE($3, description),
+	done = COALESCE($4, done),
+	priority = COALESCE($5, priority),
+	WHERE id = $1 RETURNING `+taskColumns, id, p.Title, p.Description, p.Done, p.Priority))
+
+	if errors.Is(err, pgx.ErrNoRows){
+		return nil, domain.ErrNotFound
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("update task: %w", err)
+	}
+	return &t, nil
+}
