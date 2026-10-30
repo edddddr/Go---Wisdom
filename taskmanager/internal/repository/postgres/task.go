@@ -2,13 +2,13 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	
-	"github.com/edddddr/taskmanager/internal/domain"
 
+	"github.com/edddddr/taskmanager/internal/domain"
 )
 
 
@@ -77,4 +77,20 @@ func (r *TaskRepository) List(ctx context.Context, f *domain.TaskFilter) ([]doma
 	}
 
 	return tasks, nil
+}
+
+
+func (r *TaskRepository) Get(ctx context.Context, id int) (*domain.Task, error){
+	t, err := scanTasks(r.pool.QueryRow(ctx,
+	`SELECT `+taskColumns+` FROM tasks WHERE id = $1  `, id))
+
+	if errors.Is(err, pgx.ErrNoRows){
+		return nil, domain.ErrNotFound
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("get task: %w", err)
+	}
+	
+	return &t, nil
 }
