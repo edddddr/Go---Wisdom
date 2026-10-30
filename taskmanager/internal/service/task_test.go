@@ -13,7 +13,7 @@ import (
 func ptr[T any](v T) *T { return &v }
 
 func newService() *service.TaskService {
-	return service.NewTaskService(memory.NewTaskRepostory())
+	return service.NewTasService(memory.NewTaskRepostory())
 }
 
 func TestTaskService_Create_Priority(t *testing.T) {
