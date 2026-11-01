@@ -15,7 +15,7 @@ func respondError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, domain.ErrNotFound):
 		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
-	case errors.Is(err, domain.ErrNotValidInput):
+	case errors.Is(err, domain.ErrInvalidInput):
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inputfor"})
 	default:
 		// Log the real cause; never leak internals to the client.

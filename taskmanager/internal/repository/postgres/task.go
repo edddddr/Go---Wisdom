@@ -12,7 +12,7 @@ import (
 )
 
 
-const taskColumns = `title, description, done, priority, created_at`
+const taskColumns = `id, title, description, done, priority, created_at`
 
 type TaskRepository struct {
 	pool *pgxpool.Pool
@@ -26,7 +26,7 @@ func NewTaskRepository(pool *pgxpool.Pool) *TaskRepository{
 
 func scanTasks(row pgx.Row) (domain.Task, error){
 	var t  domain.Task
-	err := row.Scan(&t.ID, &t.Description, &t.Done, &t.Priority, &t.CreatedAt)
+	err := row.Scan(&t.ID, &t.Title, &t.Description, &t.Done, &t.Priority, &t.CreatedAt)
 	
 	return t, err
 }
@@ -36,9 +36,9 @@ func (r *TaskRepository) Create(ctx context.Context, t *domain.Task) error{
 		`INSERT INTO tasks (title, description, priority, created_at)
 		 VALUES ($1, $2, $3, $4)
 		 RETURNING id`,
-		t.Title, t.Description, t.CreatedAt, t.CreatedAt,).Scan(&t.ID)
+		t.Title, t.Description, t.Priority, t.CreatedAt,).Scan(&t.ID)
 		
-	if err != nil{
+	if err != nil{	
 		return fmt.Errorf("insert task: %w", err)
 	} 
 
@@ -50,7 +50,7 @@ func (r *TaskRepository) List(ctx context.Context, f domain.TaskFilter) ([]domai
 	rows, err := r.pool.Query(ctx,
 	`SELECT `+taskColumns+`
 	FROM tasks
-	WHERE ($1::boolean is NULL OR data = $1)
+	WHERE ($1::boolean is NULL OR done = $1)
 	ORDER BY ID DESC`,
 	f.Done)
 
@@ -100,9 +100,9 @@ func (r *TaskRepository) Update(ctx context.Context, id int, p domain.TaskPatch)
 	t, err := scanTasks(r.pool.QueryRow(ctx, 
 	`UPDATE tasks SET
 	title = COALESCE($2, title),
-	desciption = COALESCE($3, description),
+	description = COALESCE($3, description),
 	done = COALESCE($4, done),
-	priority = COALESCE($5, priority),
+	priority = COALESCE($5, priority)
 	WHERE id = $1 RETURNING `+taskColumns, id, p.Title, p.Description, p.Done, p.Priority))
 
 	if errors.Is(err, pgx.ErrNoRows){

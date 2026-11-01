@@ -9,4 +9,4 @@ CREATE TABLE tasks (
 
 CREATE INDEX idx_tasks_done ON tasks (done);
 
-DROP TABLE IF EXISTS tasks;
+-- DROP TABLE IF EXISTS tasks;
