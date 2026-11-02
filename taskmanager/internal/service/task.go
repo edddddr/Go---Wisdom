@@ -90,6 +90,7 @@ func (s *TaskService) Update(ctx context.Context, id int, in UpdateInput) (*doma
 		Description: in.Description,
 		Done: in.Done,
 		Priority: in.Priority,
+		
 	}
 
 	if in.Title != nil {

@@ -12,7 +12,7 @@ import (
 )
 
 
-const taskColumns = `id, title, description, done, priority, created_at`
+const taskColumns = `id, title, description, done, priority, created_at, updated_at`
 
 type TaskRepository struct {
 	pool *pgxpool.Pool
@@ -26,7 +26,7 @@ func NewTaskRepository(pool *pgxpool.Pool) *TaskRepository{
 
 func scanTasks(row pgx.Row) (domain.Task, error){
 	var t  domain.Task
-	err := row.Scan(&t.ID, &t.Title, &t.Description, &t.Done, &t.Priority, &t.CreatedAt)
+	err := row.Scan(&t.ID, &t.Title, &t.Description, &t.Done, &t.Priority, &t.CreatedAt, &t.Updated_at)
 	
 	return t, err
 }
@@ -102,7 +102,8 @@ func (r *TaskRepository) Update(ctx context.Context, id int, p domain.TaskPatch)
 	title = COALESCE($2, title),
 	description = COALESCE($3, description),
 	done = COALESCE($4, done),
-	priority = COALESCE($5, priority)
+	priority = COALESCE($5, priority),
+	updated_at = now(),
 	WHERE id = $1 RETURNING `+taskColumns, id, p.Title, p.Description, p.Done, p.Priority))
 
 	if errors.Is(err, pgx.ErrNoRows){
