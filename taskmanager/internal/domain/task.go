@@ -5,11 +5,17 @@ import (
 	"time"
 )
 
-var ErrNotFound = errors.New("not found")
-var ErrInvalidInput = errors.New("Invalid input")
+var   (
+	ErrNotFound = errors.New("not found")
+	ErrInvalidInput = errors.New("Invalid input")
+	ErrorConflict = errors.New("Conflict")
+	ErrorUnauthorized = errors.New("unauthorized")
+)
+
 
 type Task struct {
 	ID          int       `json:"id"`
+	OwnerID     int       `json:owner_id`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Done        bool      `json:"done"`
