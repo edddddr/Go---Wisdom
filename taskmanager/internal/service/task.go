@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/edddddr/taskmanager/internal/domain"
 )
@@ -14,10 +14,10 @@ const defaultPriority = 3
 
 type TaskRepository interface {
 	 Create(ctx context.Context, t *domain.Task) error
-	 List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
-	 Get(ctx context.Context, id int) (*domain.Task, error)
-	 Update(ctx context.Context, id int, p domain.TaskPatch) (*domain.Task, error)
-	 Delete(ctx context.Context, id int) error
+	 List(ctx context.Context, ownerID int, f domain.TaskFilter) ([]domain.Task, error)
+	 Get(ctx context.Context,  ownerID int, id int) (*domain.Task, error)
+	 Update(ctx context.Context, ownerID int, id int, p domain.TaskPatch) (*domain.Task, error)
+	 Delete(ctx context.Context, ownerID int, id int) error
 }
 
 
@@ -42,7 +42,7 @@ func NewTaskService(repo TaskRepository) *TaskService {
 	return &TaskService{repo:repo}
 } 
 
-func (r *TaskService) Create(ctx context.Context, in CreateInput) (*domain.Task, error){
+func (r *TaskService) Create(ctx context.Context, ownerID int, in CreateInput) (*domain.Task, error){
 	priority := defaultPriority
 
 	if in.Priority != nil {
@@ -53,6 +53,7 @@ func (r *TaskService) Create(ctx context.Context, in CreateInput) (*domain.Task,
 		Title: in.Title,
 		Description: in.Description,
 		Priority: priority,
+		OwnerID: ownerID,
 	    CreatedAt: time.Now(),
 	}
 
@@ -64,8 +65,8 @@ func (r *TaskService) Create(ctx context.Context, in CreateInput) (*domain.Task,
 }
 
 
-func (r *TaskService) List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error){
-	tasks, err := r.repo.List(ctx, f)
+func (r *TaskService) List(ctx context.Context, ownerID int, f domain.TaskFilter) ([]domain.Task, error){
+	tasks, err := r.repo.List(ctx, ownerID, f)
 	if err != nil {
 		return nil, fmt.Errorf("list task: %w", err)
 	} 
@@ -74,8 +75,8 @@ func (r *TaskService) List(ctx context.Context, f domain.TaskFilter) ([]domain.T
 } 
 
 
-func (s *TaskService) Get(ctx context.Context, id int) (*domain.Task, error){
-		task, err := s.repo.Get(ctx, id)
+func (s *TaskService) Get(ctx context.Context, ownerID int, id int) (*domain.Task, error){
+		task, err := s.repo.Get(ctx, ownerID, id)
 
 		if err != nil {
 			return nil, fmt.Errorf("get taks: %d %w", id, err)
@@ -85,12 +86,11 @@ func (s *TaskService) Get(ctx context.Context, id int) (*domain.Task, error){
 }	
 
 
-func (s *TaskService) Update(ctx context.Context, id int, in UpdateInput) (*domain.Task, error){
+func (s *TaskService) Update(ctx context.Context, ownerID int, id int, in UpdateInput) (*domain.Task, error){
 	patch := domain.TaskPatch{
 		Description: in.Description,
 		Done: in.Done,
 		Priority: in.Priority,
-		
 	}
 
 	if in.Title != nil {
@@ -103,7 +103,7 @@ func (s *TaskService) Update(ctx context.Context, id int, in UpdateInput) (*doma
 	
 	
 	
-	t, err := s.repo.Update(ctx, id, patch)
+	t, err := s.repo.Update(ctx, ownerID, id, patch)
 	if err != nil{
 		return nil, fmt.Errorf("update task %d %w", id, err)
 	}
@@ -112,8 +112,8 @@ func (s *TaskService) Update(ctx context.Context, id int, in UpdateInput) (*doma
 
 }
 
-func (s *TaskService) Delete(ctx context.Context, id int) error {
-	err := s.repo.Delete(ctx, id)
+func (s *TaskService) Delete(ctx context.Context, ownerID int, id int) error {
+	err := s.repo.Delete(ctx, ownerID, id)
 
 	if err != nil{
 		return fmt.Errorf("delete task %d %w", id, err)

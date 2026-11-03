@@ -12,7 +12,7 @@ import (
 )
 
 
-const taskColumns = `id, title, description, done, priority, created_at, updated_at`
+const taskColumns = `id, owner_id, title, description, done, priority, created_at, updated_at`
 
 type TaskRepository struct {
 	pool *pgxpool.Pool
@@ -26,17 +26,17 @@ func NewTaskRepository(pool *pgxpool.Pool) *TaskRepository{
 
 func scanTasks(row pgx.Row) (domain.Task, error){
 	var t  domain.Task
-	err := row.Scan(&t.ID, &t.Title, &t.Description, &t.Done, &t.Priority, &t.CreatedAt, &t.Updated_at)
+	err := row.Scan(&t.ID, &t.OwnerID, &t.Title, &t.Description, &t.Done, &t.Priority, &t.CreatedAt, &t.Updated_at)
 	
 	return t, err
 }
 
 func (r *TaskRepository) Create(ctx context.Context, t *domain.Task) error{
 	err :=r.pool.QueryRow(ctx, 
-		`INSERT INTO tasks (title, description, priority, created_at)
-		 VALUES ($1, $2, $3, $4)
+		`INSERT INTO tasks (owner_id, title, description, priority, created_at)
+		 VALUES ($1, $2, $3, $4, $5)
 		 RETURNING id`,
-		t.Title, t.Description, t.Priority, t.CreatedAt,).Scan(&t.ID)
+		t.owner_id, t.Title, t.Description, t.Priority, t.CreatedAt,).Scan(&t.ID)
 		
 	if err != nil{	
 		return fmt.Errorf("insert task: %w", err)
@@ -45,14 +45,14 @@ func (r *TaskRepository) Create(ctx context.Context, t *domain.Task) error{
 	return nil
 }
 
-func (r *TaskRepository) List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error){
+func (r *TaskRepository) List(ctx context.Context, ownerID int, f domain.TaskFilter) ([]domain.Task, error){
 
 	rows, err := r.pool.Query(ctx,
 	`SELECT `+taskColumns+`
 	FROM tasks
-	WHERE ($1::boolean is NULL OR done = $1)
-	ORDER BY ID DESC`,
-	f.Done)
+	WHERE owner_id = $1  AND ($2::boolean is NULL OR done = $2)
+	ORDER BY id DESC`,
+	ownerID, f.Done)
 
 	if err != nil {
 		return nil, fmt.Errorf("query tasks %w", err)
@@ -80,9 +80,9 @@ func (r *TaskRepository) List(ctx context.Context, f domain.TaskFilter) ([]domai
 }
 
 
-func (r *TaskRepository) Get(ctx context.Context, id int) (*domain.Task, error){
+func (r *TaskRepository) Get(ctx context.Context, ownerID,  id int) (*domain.Task, error){
 	t, err := scanTasks(r.pool.QueryRow(ctx,
-	`SELECT `+taskColumns+` FROM tasks WHERE id = $1  `, id))
+	`SELECT `+taskColumns+` FROM tasks WHERE owner_id = $1 AND  id = $2  `, ownerID, id))
 
 	if errors.Is(err, pgx.ErrNoRows){
 		return nil, domain.ErrNotFound
@@ -96,15 +96,15 @@ func (r *TaskRepository) Get(ctx context.Context, id int) (*domain.Task, error){
 }
 
 
-func (r *TaskRepository) Update(ctx context.Context, id int, p domain.TaskPatch) (*domain.Task, error){
+func (r *TaskRepository) Update(ctx context.Context, ownerID int, id int, p domain.TaskPatch) (*domain.Task, error){
 	t, err := scanTasks(r.pool.QueryRow(ctx, 
 	`UPDATE tasks SET
-	title = COALESCE($2, title),
-	description = COALESCE($3, description),
-	done = COALESCE($4, done),
-	priority = COALESCE($5, priority),
+	title = COALESCE($3, title),
+	description = COALESCE($4, description),
+	done = COALESCE($5, done),
+	priority = COALESCE($6, priority),
 	updated_at = now(),
-	WHERE id = $1 RETURNING `+taskColumns, id, p.Title, p.Description, p.Done, p.Priority))
+	WHERE id = $1 AND owner_id = $2 RETURNING `+taskColumns, id,ownerID, p.Title, p.Description, p.Done, p.Priority))
 
 	if errors.Is(err, pgx.ErrNoRows){
 		return nil, domain.ErrNotFound
@@ -116,8 +116,8 @@ func (r *TaskRepository) Update(ctx context.Context, id int, p domain.TaskPatch)
 	return &t, nil
 }
 
-func (r *TaskRepository) Delete(ctx context.Context, id int) error {
-	tag, err := r.pool.Exec(ctx, `DELETE FROM tasks WHERE id = $1`, id)
+func (r *TaskRepository) Delete(ctx context.Context, ownerID int, id int) error {
+	tag, err := r.pool.Exec(ctx, `DELETE FROM tasks WHERE id = $1 AND owner_id = $2`, id, ownerID)
 	if err != nil {
 		return fmt.Errorf("delete task: %w", err)
 	}
