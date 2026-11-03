@@ -55,7 +55,7 @@ func (r *UserRepository) GetEmail(ctx context.Context, email string) (*domain.Us
 	}
 
 	if err != nil{
-		return nil, fmt.Errorf("get user by email : ",err)
+		return nil, fmt.Errorf("get user by email %w", err)
 	}
 		
 
