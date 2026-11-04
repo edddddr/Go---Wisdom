@@ -38,3 +38,26 @@ func normalizeEmail(e string) string{
 	return strings.ToLower(strings.TrimSpace(e))
 }
 
+
+func (a *AuthService) Register(ctx context.Context, email string, password string) (*domain.User, error) {
+		email = normalizeEmail(email)
+
+		if email == "" || len(password) < 8 || len(password) > 72 {
+			return nil, fmt.Errorf("invalid credentials format: %w", domain.ErrInvalidInput)
+		}
+
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+		if err != nil {
+			return nil, fmt.Errorf("hash password: %w", err)
+		}
+
+		u := &domain.User{Email:email, PasswordHash:string(hash)}
+
+		if err := a.users.Create(ctx, u); err != nil{
+			return nil, fmt.Errorf("create user: %w", err)
+		}
+
+		return u, nil
+
+}
