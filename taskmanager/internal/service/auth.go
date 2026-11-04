@@ -2,13 +2,10 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/edddddr/taskmanager/internal/domain"
@@ -35,3 +32,9 @@ func NewAuthService(users UserRepository, secrete []byte, ttl time.Duration) (*A
 	return &AuthService{users:users, secrete:secrete, ttl:ttl, dummyHash:dummy}, nil
 
 }
+
+
+func normalizeEmail(e string) string{
+	return strings.ToLower(strings.TrimSpace(e))
+}
+
