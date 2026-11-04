@@ -31,12 +31,14 @@ func scanTasks(row pgx.Row) (domain.Task, error){
 	return t, err
 }
 
+
+
 func (r *TaskRepository) Create(ctx context.Context, t *domain.Task) error{
 	err :=r.pool.QueryRow(ctx, 
 		`INSERT INTO tasks (owner_id, title, description, priority, created_at)
 		 VALUES ($1, $2, $3, $4, $5)
 		 RETURNING id`,
-		t.owner_id, t.Title, t.Description, t.Priority, t.CreatedAt,).Scan(&t.ID)
+		t.OwnerID, t.Title, t.Description, t.Priority, t.CreatedAt,).Scan(&t.ID)
 		
 	if err != nil{	
 		return fmt.Errorf("insert task: %w", err)

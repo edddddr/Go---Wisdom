@@ -31,7 +31,7 @@ func (r *UserRepository) Create(ctx context.Context, u domain.User) error{
 	`INSERT TO users (email, password_hash)
 	VALUE($1,$2)
 	RETURNING id, created_at`,
-	u.Email, u.CreatedAt).Scan(&u.ID, &u.CreatedAt)
+	u.Email, u.PasswordHash).Scan(&u.ID, &u.CreatedAt)
 
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == uniqueViolation{
