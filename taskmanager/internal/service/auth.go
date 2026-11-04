@@ -26,4 +26,12 @@ type AuthService struct{
 	ttl     time.Duration
 	dummyHash  []byte
 }
+func NewAuthService(users UserRepository, secrete []byte, ttl time.Duration) (*AuthService, error){
+	dummy, err := bcrypt.GenerateFromPassword([]byte("dumy-passowrd"), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("create dummy hash: %w", err)
+	}
+	
+	return &AuthService{users:users, secrete:secrete, ttl:ttl, dummyHash:dummy}, nil
 
+}
