@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/edddddr/taskmanager/internal/domain"
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepository interface{
@@ -20,18 +21,18 @@ type UserRepository interface{
 
 type AuthService struct{
 	users UserRepository
-	secrete []byte
+	secret []byte
 	ttl     time.Duration
 	dummyHash  []byte
 }
 
-func NewAuthService(users UserRepository, secrete []byte, ttl time.Duration) (*AuthService, error){
+func NewAuthService(users UserRepository, secret []byte, ttl time.Duration) (*AuthService, error){
 	dummy, err := bcrypt.GenerateFromPassword([]byte("dumy-passowrd"), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("create dummy hash: %w", err)
 	}
 	
-	return &AuthService{users:users, secrete:secrete, ttl:ttl, dummyHash:dummy}, nil
+	return &AuthService{users:users, secret:secret, ttl:ttl, dummyHash:dummy}, nil
 
 }
 
@@ -84,7 +85,20 @@ func (s *AuthService) Login(ctx context.Context, email string, password string) 
 		return "", domain.ErrorUnauthorized
 	}
 		
-	return "u.ID", nil
+	return s.issueToken(u.ID)
 }
 
 
+func (s *AuthService) issueToken(userID int) (string, error) {
+	now := time.Now()
+	claims := jwt.RegisteredClaims{
+		Subject:   strconv.Itoa(userID),
+		IssuedAt:  jwt.NewNumericDate(now),
+		ExpiresAt: jwt.NewNumericDate(now.Add(s.ttl)),
+	}
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(s.secret)
+	if err != nil {
+		return "", fmt.Errorf("sign token: %w", err)
+	}
+	return token, nil
+}
