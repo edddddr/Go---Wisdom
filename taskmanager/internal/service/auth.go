@@ -102,3 +102,21 @@ func (s *AuthService) issueToken(userID int) (string, error) {
 	}
 	return token, nil
 }
+
+
+func (s *AuthService) ParseToken(tokenStr string) (int, error) {
+	claims := &jwt.RegisteredClaims{}
+	_, err := jwt.ParseWithClaims(tokenStr, claims,
+		func(t *jwt.Token) (any, error) { return s.secret, nil },
+		jwt.WithValidMethods([]string{"HS256"}),
+		jwt.WithExpirationRequired(),
+	)
+	if err != nil {
+		return 0, domain.ErrorUnauthorized
+	}
+	id, err := strconv.Atoi(claims.Subject)
+	if err != nil || id <= 0 {
+		return 0, domain.ErrorUnauthorized
+	}
+	return id, nil
+}
