@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-
 	"github.com/edddddr/taskmanager/internal/domain"
 	"github.com/edddddr/taskmanager/internal/service"
 	"github.com/gin-gonic/gin"
@@ -13,11 +12,11 @@ import (
 
 
 type TaskRepository interface{
-	Create(ctx context.Context, in service.CreateInput) (*domain.Task, error)
-	List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error)
-	Get(ctx context.Context, id int) (*domain.Task, error) 
-	Update(ctx context.Context, id int, in service.UpdateInput) (*domain.Task, error)
-	Delete(ctx context.Context, id int) error 
+	Create(ctx context.Context, ownerID int, in service.CreateInput) (*domain.Task, error)
+	List(ctx context.Context, ownerID int,  f domain.TaskFilter) ([]domain.Task, error)
+	Get(ctx context.Context, ownerID int, id int) (*domain.Task, error) 
+	Update(ctx context.Context, ownerID int, id int, in service.UpdateInput) (*domain.Task, error)
+	Delete(ctx context.Context, ownerID int, id int) error 
 }
 
 type CreateTaskRequest struct { 
@@ -51,7 +50,7 @@ func (h *TaskHandler)  Create(c *gin.Context){
 		return  
 	}
 
-	task, err := h.serv.Create(c.Request.Context(), service.CreateInput{
+	task, err := h.serv.Create(c.Request.Context(), currentUserID(c), service.CreateInput{
 		Title:       req.Title,
 		Description: req.Description,
 		Priority:    req.Priority,
@@ -80,7 +79,7 @@ func (h *TaskHandler) List(c *gin.Context){
 		filter.Done = &v
 	}
 
-	tasks, err := h.serv.List(c.Request.Context(), filter)
+	tasks, err := h.serv.List(c.Request.Context(), currentUserID(c),filter)
 
 	if err != nil{
 		respondError(c, err)
@@ -98,7 +97,7 @@ func (h *TaskHandler) Get(c *gin.Context){
 	if !ok {
 		return
 	}
-	task, err := h.serv.Get(c.Request.Context(), id)
+	task, err := h.serv.Get(c.Request.Context(), currentUserID(c),  id)
 	if err != nil {
 		respondError(c, err)
 		return
@@ -121,7 +120,7 @@ func (h *TaskHandler) Update(c *gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	task, err := h.serv.Update(c.Request.Context(), id, service.UpdateInput{
+	task, err := h.serv.Update(c.Request.Context(), currentUserID(c), id, service.UpdateInput{
 		Title: req.Title,
 		Description: req.Description,
 		Priority: req.Priority,
@@ -143,7 +142,7 @@ func (h *TaskHandler) Delete(c *gin.Context){
 		return
 	}
 
-	err := h.serv.Delete(c.Request.Context(), id)
+	err := h.serv.Delete(c.Request.Context(), currentUserID(c),  id)
 
 	if err != nil{
 		respondError(c, err)

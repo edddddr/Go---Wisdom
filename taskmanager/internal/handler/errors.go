@@ -23,7 +23,7 @@ func respondError(c *gin.Context, err error) {
 		c.JSON(http.StatusConflict, gin.H{"error": "already exists"})
 	default:
 		// Log the real cause; never leak internals to the client.
-		log.Printf("internal error: %v", err)
+		log.Printf("internal error: %w", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 	}
 }
