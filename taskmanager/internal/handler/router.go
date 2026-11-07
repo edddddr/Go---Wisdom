@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewTaskRouter(task *TaskHandler) *gin.Engine {
+func NewTaskRouter(auth *AuthHandler, task *TaskHandler, tokens TokenParser) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/health", func(c *gin.Context){
@@ -15,7 +15,12 @@ func NewTaskRouter(task *TaskHandler) *gin.Engine {
 
 	v1 := r.Group("/api/v1")
 	{
-		t := v1.Group("/task")
+		a := v1.Group("/auth")
+		a.POST("/register", auth.Register)
+		a.POST("/login", auth.Login)
+
+
+		t := v1.Group("/task", RequireAuth(tokens))
 		t.POST("", task.Create)
 		t.GET("", task.List)
 		t.GET(":id", task.Get)
