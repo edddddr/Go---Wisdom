@@ -53,3 +53,19 @@ func (h *AuthHandler) Register(c *gin.Context){
 	c.JSON(http.StatusCreated, gin.H{"id": u.ID, "email": u.Email})
 
 }
+
+func (h *AuthHandler) Login(c *gin.Context){
+	var req loginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil{
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	token, err := h.svc.Login(c, req.Email, req.Password)
+
+	if err != nil{
+		respondError(c, err)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"access_token": token, "token_type": "Bearer"})
+}
