@@ -37,3 +37,8 @@ func abortUnauthorized(c *gin.Context) {
 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 }
 
+
+
+func currentUserID(c *gin.Context) int {
+	return c.GetInt(userIDKey)
+}
