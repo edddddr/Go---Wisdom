@@ -28,8 +28,8 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository{
 func (r *UserRepository) Create(ctx context.Context, u *domain.User) error{
 	
 	err := r.pool.QueryRow(ctx,
-	`INSERT TO users (email, password_hash)
-	VALUE($1,$2)
+	`INSERT INTO users (email, password_hash)
+	VALUES ($1,$2)
 	RETURNING id, created_at`,
 	u.Email, u.PasswordHash).Scan(&u.ID, &u.CreatedAt)
 
@@ -48,7 +48,7 @@ func (r *UserRepository) Create(ctx context.Context, u *domain.User) error{
 func (r *UserRepository) GetEmail(ctx context.Context, email string) (*domain.User, error){
 	var u domain.User
     err := r.pool.QueryRow(ctx,
-		`SELECT id, email, password_hash, created_at FROM users WHERE email = $1`, email).Scan(u.ID, u.Email, u.PasswordHash, u.CreatedAt)
+		`SELECT id, email, password_hash, created_at FROM users WHERE email = $1`, email).Scan(&u.ID, &u.Email, &u.PasswordHash, &u.CreatedAt)
 
 	if errors.Is(err, pgx.ErrNoRows){
 		return nil, domain.ErrNotFound

@@ -18,12 +18,12 @@ type AuthService interface {
 
 type registerRequest struct {
 	Email string `json:"email" binding:"required,email,max=254"`
-	Password string `json:"password" binding:"required, min=8, max=72"`
+	Password string `json:"password" binding:"required,min=8,max=72"`
 }
 
 type loginRequest struct{
 	Email string `json:"email" binding:"required,email,max=254"`
-	Password string `json:"password" binding:"required, max=72"`
+	Password string `json:"password" binding:"required,max=72"`
 }
 
 type AuthHandler struct{
@@ -59,12 +59,14 @@ func (h *AuthHandler) Login(c *gin.Context){
 
 	if err := c.ShouldBindJSON(&req); err != nil{
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	token, err := h.svc.Login(c, req.Email, req.Password)
 
 	if err != nil{
 		respondError(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"access_token": token, "token_type": "Bearer"})
