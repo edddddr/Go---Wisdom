@@ -25,7 +25,7 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository{
 }
 
 
-func (r *UserRepository) Create(ctx context.Context, u domain.User) error{
+func (r *UserRepository) Create(ctx context.Context, u *domain.User) error{
 	
 	err := r.pool.QueryRow(ctx,
 	`INSERT TO users (email, password_hash)

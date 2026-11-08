@@ -46,11 +46,18 @@ func run() error{
 	}
 
 
+	userRepo := postgres.NewUserRepository(pool)
+	authSvc, err := service.NewAuthService(userRepo, []byte(cfg.JWTSecret), time.Hour)
 
-	repo := postgres.NewTaskRepository(pool)
-	svc := service.NewTaskService(repo)
+	if err !=  nil{
+		return fmt.Errorf("create auth service: %w", err)
+	}
+
+	authHandler := handler.NewAuthHandler(authSvc)
+	taskRepo := postgres.NewTaskRepository(pool)
+	svc := service.NewTaskService(taskRepo)
 	taskHandler := handler.NewTaskHandler(svc)
-	router := handler.NewTaskRouter(taskHandler)
+	router := handler.NewTaskRouter(authHandler, taskHandler, authSvc)
 
 	return router.Run(":" + cfg.Port)
 }

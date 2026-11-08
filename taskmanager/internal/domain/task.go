@@ -7,9 +7,9 @@ import (
 
 var   (
 	ErrNotFound = errors.New("not found")
-	ErrInvalidInput = errors.New("Invalid input")
-	ErrorConflict = errors.New("Conflict")
-	ErrorUnauthorized = errors.New("unauthorized")
+	ErrInvalidInput = errors.New("invalid input")
+	ErrorConflict = errors.New("conflict")
+	ErrorUnauthorized = errors.New("nauthorized")
 )
 
 
