@@ -36,3 +36,15 @@ func (h contextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 func (h contextHandler) WithGroup(name string) slog.Handler {
 	return contextHandler{h.Handler.WithGroup(name)}
 }
+
+// New builds a logger. JSON for production (machines read it), text for local dev.
+func New(w io.Writer, level slog.Level, jsonFormat bool) *slog.Logger {
+	opts := &slog.HandlerOptions{Level: level}
+	var h slog.Handler
+	if jsonFormat {
+		h = slog.NewJSONHandler(w, opts)
+	} else {
+		h = slog.NewTextHandler(w, opts)
+	}
+	return slog.New(contextHandler{h})
+}
