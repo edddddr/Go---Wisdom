@@ -35,7 +35,7 @@ func (r *UserRepository) Create(ctx context.Context, u *domain.User) error{
 
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == uniqueViolation{
-		return domain.ErrorConflict
+		return domain.ErrConflict
 	}
 
 	if err != nil{

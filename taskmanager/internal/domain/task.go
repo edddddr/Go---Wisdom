@@ -8,8 +8,8 @@ import (
 var   (
 	ErrNotFound = errors.New("not found")
 	ErrInvalidInput = errors.New("invalid input")
-	ErrorConflict = errors.New("conflict")
-	ErrorUnauthorized = errors.New("nauthorized")
+	ErrConflict = errors.New("conflict")
+	ErrUnauthorized = errors.New("nauthorized")
 )
 
 

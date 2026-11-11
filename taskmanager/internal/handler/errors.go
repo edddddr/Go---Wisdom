@@ -16,10 +16,10 @@ func respondError(c *gin.Context, err error) {
 	case errors.Is(err, domain.ErrNotFound):
 		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 	case errors.Is(err, domain.ErrInvalidInput):
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inputfor"})
-	case errors.Is(err, domain.ErrorUnauthorized):
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inputform"})
+	case errors.Is(err, domain.ErrUnauthorized):
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-	case errors.Is(err, domain.ErrorConflict):
+	case errors.Is(err, domain.ErrConflict):
 		c.JSON(http.StatusConflict, gin.H{"error": "already exists"})
 	default:
 		// Log the real cause; never leak internals to the client.

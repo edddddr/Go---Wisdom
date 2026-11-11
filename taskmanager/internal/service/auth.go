@@ -73,7 +73,7 @@ func (s *AuthService) Login(ctx context.Context, email string, password string) 
 	
 	if errors.Is(err, domain.ErrNotFound) {
 		_ = bcrypt.CompareHashAndPassword(s.dummyHash, []byte(password))
-		return "", domain.ErrorUnauthorized
+		return "", domain.ErrUnauthorized
 
 	}
 
@@ -82,7 +82,7 @@ func (s *AuthService) Login(ctx context.Context, email string, password string) 
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)); err != nil{
-		return "", domain.ErrorUnauthorized
+		return "", domain.ErrUnauthorized
 	}
 		
 	return s.issueToken(u.ID)
@@ -112,11 +112,11 @@ func (s *AuthService) ParseToken(tokenStr string) (int, error) {
 		jwt.WithExpirationRequired(),
 	)
 	if err != nil {
-		return 0, domain.ErrorUnauthorized
+		return 0, domain.ErrUnauthorized
 	}
 	id, err := strconv.Atoi(claims.Subject)
 	if err != nil || id <= 0 {
-		return 0, domain.ErrorUnauthorized
+		return 0, domain.ErrUnauthorized
 	}
 	return id, nil
 }
