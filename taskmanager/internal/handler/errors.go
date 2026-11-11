@@ -1,29 +1,24 @@
 package handler
 
 import (
-	"errors"
-	"log"
-	"net/http"
+	"reflect"
+	"strings"
 
-	"github.com/gin-gonic/gin"
-
-	"github.com/edddddr/taskmanager/internal/domain"
-)
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 
 	
-func respondError(c *gin.Context, err error) {
-	switch {
-	case errors.Is(err, domain.ErrNotFound):
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
-	case errors.Is(err, domain.ErrInvalidInput):
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inputform"})
-	case errors.Is(err, domain.ErrUnauthorized):
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-	case errors.Is(err, domain.ErrConflict):
-		c.JSON(http.StatusConflict, gin.H{"error": "already exists"})
-	default:
-		// Log the real cause; never leak internals to the client.
-		log.Printf("internal error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+)
+
+// Make validation errors report JSON field names ("title") instead of Go names ("Title").
+func init() {
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterTagNameFunc(func(f reflect.StructField) string {
+			name := strings.SplitN(f.Tag.Get("json"), ",", 2)[0]
+			if name == "-" {
+				return ""
+			}
+			return name
+		})
 	}
 }
