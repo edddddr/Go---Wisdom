@@ -96,7 +96,8 @@ func (s *TaskService) Update(ctx context.Context, ownerID int, id int, in Update
 	if in.Title != nil {
 		title := strings.TrimSpace(*in.Title)
 		if title == "" {
-			return nil, fmt.Errorf("title must not be blank: %w", domain.ErrInvalidInput)
+			return nil, &domain.InvalidInputError{Field: "title", Reason: "must not be blank"}
+}
 		}
 		patch.Title = &title
 	}
