@@ -5,6 +5,8 @@ import (
 	"strings"
 	"crypto/rand"
 	"encoding/hex"
+	"log/slog"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -81,4 +83,30 @@ func newRequestID() string {
 	b := make([]byte, 16)
 	_, _ = rand.Read(b) // crypto/rand.Read never returns an error on supported platforms
 	return hex.EncodeToString(b)
+}
+
+
+
+func AccessLog() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+
+		status := c.Writer.Status()
+		level := slog.LevelInfo
+		switch {
+		case status >= 500:
+			level = slog.LevelError
+		case status >= 400:
+			level = slog.LevelWarn
+		}
+		slog.Log(c.Request.Context(), level, "request",
+			"method", c.Request.Method,
+			"route", c.FullPath(),
+			"status", status,
+			"duration_ms", time.Since(start).Milliseconds(),
+			"bytes", c.Writer.Size(),
+			"client_ip", c.ClientIP(),
+		)
+	}
 }
