@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
 	"net/http"
 	"reflect"
 	"strings"
@@ -91,3 +93,31 @@ func respondBindError(c *gin.Context, err error) {
 	}
 }
 
+
+func respondError(c *gin.Context, err error) {
+	var invalid *domain.InvalidInputError
+
+	switch {
+	case errors.As(err, &invalid):
+		writeError(c, http.StatusBadRequest, "invalid_input", "invalid input",
+			fieldError{Field: invalid.Field, Issue: invalid.Reason})
+	case errors.Is(err, domain.ErrInvalidInput):
+		writeError(c, http.StatusBadRequest, "invalid_input", "invalid input")
+	case errors.Is(err, domain.ErrNotFound):
+		writeError(c, http.StatusNotFound, "not_found", "resource not found")
+	case errors.Is(err, domain.ErrUnauthorized):
+		writeError(c, http.StatusUnauthorized, "unauthorized", "invalid credentials")
+	case errors.Is(err, domain.ErrConflict):
+		writeError(c, http.StatusConflict, "conflict", "resource already exists")
+	case errors.Is(err, context.DeadlineExceeded):
+		slog.WarnContext(c.Request.Context(), "request deadline exceeded", "error", err)
+		writeError(c, http.StatusGatewayTimeout, "timeout", "request took too long")
+	case errors.Is(err, context.Canceled):
+		// The client disconnected, so nobody is listening. 499 is nginx's convention.
+		c.AbortWithStatus(499)
+	default:
+		// The one place unexpected errors get logged. The client sees nothing internal.
+		slog.ErrorContext(c.Request.Context(), "unhandled error", "error", err)
+		writeError(c, http.StatusInternalServerError, "internal_error", "internal server error")
+	}
+}
