@@ -5,7 +5,10 @@ import (
 	"strings"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
+	"io"
 	"log/slog"
+	"runtime/debug"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -109,4 +112,15 @@ func AccessLog() gin.HandlerFunc {
 			"client_ip", c.ClientIP(),
 		)
 	}
+}
+
+
+func Recovery() gin.HandlerFunc {
+	return gin.CustomRecoveryWithWriter(io.Discard, func(c *gin.Context, recovered any) {
+		slog.ErrorContext(c.Request.Context(), "panic recovered",
+			"panic", fmt.Sprint(recovered),
+			"stack", string(debug.Stack()),
+		)
+		writeError(c, http.StatusInternalServerError, "internal_error", "internal server error")
+	})
 }
