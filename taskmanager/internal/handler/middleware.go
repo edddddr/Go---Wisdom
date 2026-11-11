@@ -124,3 +124,11 @@ func Recovery() gin.HandlerFunc {
 		writeError(c, http.StatusInternalServerError, "internal_error", "internal server error")
 	})
 }
+
+
+func MaxBody(n int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, n)
+		c.Next()
+	}
+}
