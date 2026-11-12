@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
@@ -60,6 +61,8 @@ func (s *AuthService) Register(ctx context.Context, email string, password strin
 		if err := s.users.Create(ctx, u); err != nil{
 			return nil, fmt.Errorf("create user: %w", err)
 		}
+
+		slog.InfoContext(ctx, "user registered", "user_id", u.ID)
 
 		return u, nil
 
