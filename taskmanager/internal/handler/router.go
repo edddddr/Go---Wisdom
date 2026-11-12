@@ -28,8 +28,8 @@ type Options struct {
 
 
 
-func NewTaskRouter(auth *AuthHandler, task *TaskHandler, tokens TokenParser) *gin.Engine {
-	r := gin.Default()
+func NewRouter(auth *AuthHandler, task *TaskHandler, tokens TokenParser) *gin.Engine {
+	r := gin.New()
 
 	r.GET("/health", func(c *gin.Context){
 		c.JSON(http.StatusOK, gin.H{"satus": "ok"})
