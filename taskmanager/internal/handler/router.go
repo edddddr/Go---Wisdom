@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -28,8 +29,24 @@ type Options struct {
 
 
 
-func NewRouter(auth *AuthHandler, task *TaskHandler, tokens TokenParser) *gin.Engine {
+func NewRouter(o Options) (*gin.Engine, error) {
 	r := gin.New()
+
+	if err := r.SetTrustedProxies(o.TrustedProxies); err != nil {
+		return nil, fmt.Errorf("set trusted proxies: %w", err)
+	}
+
+	r.Use(RequestID(), AccessLog(), Recovery(), MaxBody(o.MaxBodyBytes), Timeout(o.RequestTimeout))
+
+	r.HandleMethodNotAllowed = true
+	r.NoRoute(func(c *gin.Context) {
+		writeError(c, http.StatusNotFound, "not_found", "route not found")
+	})
+	r.NoMethod(func(c *gin.Context) {
+		writeError(c, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed")
+	})
+
+	
 
 	r.GET("/health", func(c *gin.Context){
 		c.JSON(http.StatusOK, gin.H{"satus": "ok"})
