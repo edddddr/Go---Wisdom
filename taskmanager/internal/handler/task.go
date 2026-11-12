@@ -45,10 +45,10 @@ func NewTaskHandler(serv TaskRepository) *TaskHandler{
 
 func (h *TaskHandler)  Create(c *gin.Context){
 	var req  CreateTaskRequest
-	if err := c.ShouldBindJSON(&req); err != nil{
-		c.JSON(400, gin.H{"error": err.Error()})
-		return  
+	if !bindJSON(c, &req) {
+		return
 	}
+
 
 	task, err := h.serv.Create(c.Request.Context(), currentUserID(c), service.CreateInput{
 		Title:       req.Title,
@@ -73,7 +73,8 @@ func (h *TaskHandler) List(c *gin.Context){
 	if done, ok := c.GetQuery("done"); ok {
 		v, err := strconv.ParseBool(done)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error" : "The done must be ture of false"})
+			writeError(c, http.StatusBadRequest, "invalid_query", "invalid query parameter",
+				fieldError{Field: "done", Issue: "must be true or false"})
 			return
 		}
 		filter.Done = &v
@@ -116,8 +117,7 @@ func (h *TaskHandler) Update(c *gin.Context){
 	}
 
 	var req UpdateTaskRequest
-	if err := c.ShouldBind(&req); err != nil{
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !bindJSON(c, &req) {
 		return
 	}
 	task, err := h.serv.Update(c.Request.Context(), currentUserID(c), id, service.UpdateInput{
