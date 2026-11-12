@@ -67,22 +67,22 @@ func NewRouter(o Options) (*gin.Engine, error) {
 
 
 
-	v1 := r.Group("/api/v1")
+	v1 := r.Group("/api/v1",  RateLimit(o.GlobalLimiter))
 	{
-		a := v1.Group("/auth")
-		a.POST("/register", auth.Register)
-		a.POST("/login", auth.Login)
+		a := v1.Group("/auth", RateLimit(o.AuthLimiter))
+		a.POST("/register", o.Auth.Register)
+		a.POST("/login", o.Auth.Login)
 
 
-		t := v1.Group("/task", RequireAuth(tokens))
-		t.POST("", task.Create)
-		t.GET("", task.List)
-		t.GET(":id", task.Get)
-		t.PUT(":id", task.Update)
-		t.DELETE(":id", task.Delete)
+		t := v1.Group("/task", RequireAuth(o.Tokens))
+		t.POST("", o.Tasks.Create)
+		t.GET("", o.Tasks.List)
+		t.GET(":id", o.Tasks.Get)
+		t.PUT(":id", o.Tasks.Update)
+		t.DELETE(":id", o.Tasks.Delete)
 	}
 		
-	return r
+	return r, nil
 }
 
 
