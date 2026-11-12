@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -51,6 +52,20 @@ func NewRouter(o Options) (*gin.Engine, error) {
 	r.GET("/health", func(c *gin.Context){
 		c.JSON(http.StatusOK, gin.H{"satus": "ok"})
 	})
+
+
+	r.GET("/readyz", func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+		defer cancel()
+		if err := o.DB.Ping(ctx); err != nil {
+			slog.ErrorContext(ctx, "readiness check failed", "error", err)
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "ready"})
+	})
+
+
 
 	v1 := r.Group("/api/v1")
 	{
