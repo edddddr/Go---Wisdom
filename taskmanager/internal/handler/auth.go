@@ -38,8 +38,7 @@ func NewAuthHandler(svc AuthService) *AuthHandler{
 func (h *AuthHandler) Register(c *gin.Context){
 	var req  registerRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil{
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !bindJSON(c, &req) {
 		return
 	}
 
@@ -57,8 +56,7 @@ func (h *AuthHandler) Register(c *gin.Context){
 func (h *AuthHandler) Login(c *gin.Context){
 	var req loginRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil{
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !bindJSON(c, &req) {
 		return
 	}
 

@@ -157,7 +157,8 @@ func (h *TaskHandler) Delete(c *gin.Context){
 func parseID(c *gin.Context) (int, bool) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		writeError(c, http.StatusBadRequest, "invalid_id", "invalid id",
+			fieldError{Field: "id", Issue: "must be a positive integer"})
 		return 0, false
 	}
 	return id, true
