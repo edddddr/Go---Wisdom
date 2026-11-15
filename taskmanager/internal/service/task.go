@@ -26,6 +26,7 @@ type CreateInput struct{
 	Description string
 	Priority *int 
 }
+
 type UpdateInput struct{
 	Title       *string
 	Description *string

@@ -106,7 +106,7 @@ func (r *TaskRepository) Update(ctx context.Context, ownerID int, id int, p doma
 	done = COALESCE($5, done),
 	priority = COALESCE($6, priority),
 	updated_at = now(),
-	WHERE id = $1 AND owner_id = $2 RETURNING `+taskColumns, id,ownerID, p.Title, p.Description, p.Done, p.Priority))
+	WHERE id = $1 AND owner_id = $2 RETURNING `+taskColumns, id, ownerID, p.Title, p.Description, p.Done, p.Priority))
 
 	if errors.Is(err, pgx.ErrNoRows){
 		return nil, domain.ErrNotFound
