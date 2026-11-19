@@ -34,21 +34,28 @@ func (r *TaskRepository) Create(ctx context.Context, t *domain.Task) error {
 	return nil
 }
 
-func (r *TaskRepository) List(ctx context.Context, f domain.TaskFilter) ([]domain.Task, error){
-	r.mu.Lock()
-	defer  r.mu.Unlock()
+
+func (r *TaskRepository) List(ctx context.Context, ownerID int, f domain.TaskFilter) ([]domain.Task, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 
 	out := make([]domain.Task, 0, len(r.tasks))
-
-	for _, t := range r.tasks{
-		if f.Done != nil && t.Done != *f.Done{
+	for _, t := range r.tasks {
+		if t.OwnerID != ownerID {
+			continue
+		}
+		if f.Done != nil && t.Done != *f.Done {
+			continue
+		}
+		if f.BeforeID != nil && t.ID >= *f.BeforeID {
 			continue
 		}
 		out = append(out, t)
 	}
-
 	sort.Slice(out, func(i, j int) bool { return out[i].ID > out[j].ID })
-
+	if f.Limit > 0 && len(out) > f.Limit {
+		out = out[:f.Limit]
+	}
 	return out, nil
 }
 
@@ -90,17 +97,30 @@ func (r *TaskRepository) Update(ctx context.Context, id int, p domain.TaskPatch)
 	return &t, nil
 }
 
-func (r *TaskRepository) Delete(ctx context.Context, id int) error {
+// func (r *TaskRepository) Delete(ctx context.Context, id int) error {
+// 	r.mu.Lock()
+// 	defer r.mu.Unlock()
+
+// 	_, ok := r.tasks[id]
+
+// 	if !ok{
+// 		return domain.ErrNotFound
+// 	}
+
+// 	delete(r.tasks, id)
+
+// 	return nil
+// }
+
+
+func (r *TaskRepository) Delete(ctx context.Context, userID, id int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	_, ok := r.tasks[id]
-
-	if !ok{
+	t, ok := r.tasks[id]
+	if !ok || t.OwnerID != userID {
 		return domain.ErrNotFound
 	}
-
 	delete(r.tasks, id)
-
 	return nil
 }

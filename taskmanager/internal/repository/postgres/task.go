@@ -50,11 +50,15 @@ func (r *TaskRepository) Create(ctx context.Context, t *domain.Task) error{
 func (r *TaskRepository) List(ctx context.Context, ownerID int, f domain.TaskFilter) ([]domain.Task, error){
 
 	rows, err := r.pool.Query(ctx,
-	`SELECT `+taskColumns+`
+    `SELECT `+taskColumns+`
 	FROM tasks
-	WHERE owner_id = $1  AND ($2::boolean is NULL OR done = $2)
-	ORDER BY id DESC`,
-	ownerID, f.Done)
+	WHERE owner_id = $1  
+		AND ($2::boolean is NULL OR done = $2)
+		AND ($3::bigint is NULL OR id < $3)
+	ORDER BY id DESC
+	limit $4`,
+	ownerID, f.Done, f.BeforeID, f.Limit,
+	)
 
 	if err != nil {
 		return nil, fmt.Errorf("query tasks %w", err)
