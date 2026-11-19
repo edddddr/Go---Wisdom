@@ -26,6 +26,7 @@ type Options struct {
 	RequestTimeout time.Duration
 	MaxBodyBytes   int64
 	TrustedProxies []string // empty means: trust no proxy headers
+	OpenAPISpec []byte	
 }
 
 
@@ -64,6 +65,12 @@ func NewRouter(o Options) (*gin.Engine, error) {
 		}
 		c.JSON(http.StatusOK, gin.H{"status": "ready"})
 	})
+
+	if len(o.OpenAPISpec) > 0 {
+		r.GET("/openapi.yaml", func(c *gin.Context) {
+			c.Data(http.StatusOK, "application/yaml", o.OpenAPISpec)
+		})
+	}
 
 
 
