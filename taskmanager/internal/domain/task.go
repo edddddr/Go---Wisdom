@@ -35,5 +35,9 @@ type TaskPatch struct {
 // TaskFilter: nil Done means "don't filter by done".
 type TaskFilter struct {
 	Done *bool
+	BeforeID *int // only tasks with id < BeforeID (the cursor)
+	Limit    int
 }
+
+
 
