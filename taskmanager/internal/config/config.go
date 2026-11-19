@@ -14,6 +14,7 @@ type Config struct {
 	DatabaseURL     string
 	JWTSecret       string
 	LogLevel        string
+	MetricsPort     string
 	TrustedProxies  []string
 	RequestTimeout  time.Duration
 	ShutdownTimeout time.Duration
@@ -27,6 +28,7 @@ func Load() (Config, error)  {
 		JWTSecret : os.Getenv("JWT_SECRET"),
 		LogLevel:       getEnv("LOG_LEVEL", "info"),
 		TrustedProxies: splitList(os.Getenv("TRUSTED_PROXIES")),
+		MetricsPort: getEnv("METRICS_PORT", "9090"),
 	}
 
 	

@@ -37,7 +37,7 @@ func NewRouter(o Options) (*gin.Engine, error) {
 		return nil, fmt.Errorf("set trusted proxies: %w", err)
 	}
 
-	r.Use(RequestID(), AccessLog(), Recovery(), MaxBody(o.MaxBodyBytes), Timeout(o.RequestTimeout))
+	r.Use(RequestID(), AccessLog(), Metrics(), Recovery(), MaxBody(o.MaxBodyBytes), Timeout(o.RequestTimeout))
 
 	r.HandleMethodNotAllowed = true
 	r.NoRoute(func(c *gin.Context) {
