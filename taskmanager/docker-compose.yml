@@ -1,19 +1,45 @@
-  services:
-    db:
-      image: postgres:16-alpine
-      environment:
-        POSTGRES_USER: teamtasks
-        POSTGRES_PASSWORD: teamtasks
-        POSTGRES_DB: teamtasks
-      ports:
-        - "5434:5432"
-      volumes:
-        - pgdata:/var/lib/postgresql/data
-      healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U teamtasks"]
-        interval: 5s
-        timeout: 3s
-        retries: 5
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: teamtasks
+      POSTGRES_PASSWORD: teamtasks
+      POSTGRES_DB: teamtasks
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teamtasks"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  volumes:
-    pgdata:
+  migrate:
+    image: migrate/migrate
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://teamtasks:teamtasks@db:5432/teamtasks?sslmode=disable"
+      - "up"
+    volumes:
+      - ./migrations:/migrations:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: .
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgres://teamtasks:teamtasks@db:5432/teamtasks?sslmode=disable
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+    ports:
+      - "8080:8080"
+      - "127.0.0.1:9090:9090"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  pgdata:
