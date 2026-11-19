@@ -9,7 +9,13 @@ import (
 	"github.com/edddddr/taskmanager/internal/domain"
 )
 
-const defaultPriority = 3
+
+const (
+	defaultPriority = 3
+	defaultPageSize = 20
+	maxPageSize     = 100
+)
+
 
 
 type TaskRepository interface {
@@ -39,6 +45,19 @@ type TaskService struct{
 	repo TaskRepository
 }
 
+
+type ListTasksInput struct {
+	Done     *bool
+	Limit    *int
+	BeforeID *int 
+}
+
+type TaskPage struct {
+	Items      []domain.Task
+	NextCursor *int
+}
+
+
 func NewTaskService(repo TaskRepository) *TaskService {
 	return &TaskService{repo:repo}
 } 
@@ -66,13 +85,43 @@ func (r *TaskService) Create(ctx context.Context, ownerID int, in CreateInput) (
 }
 
 
-func (r *TaskService) List(ctx context.Context, ownerID int, f domain.TaskFilter) ([]domain.Task, error){
-	tasks, err := r.repo.List(ctx, ownerID, f)
+func (r *TaskService) List(ctx context.Context, ownerID int, in ListTasksInput) (*TaskPage, error){
+	limit := defaultPageSize
+
+
+	if in.Limit != nil {
+		limit = *in.Limit
+		if limit < 1 || limit > maxPageSize {
+			return nil, &domain.InvalidInputError{
+				Field:  "limit",
+				Reason: fmt.Sprintf("must be between 1 and %d", maxPageSize),
+			}
+		}
+	}
+
+	if in.BeforeID != nil && *in.BeforeID < 1 {
+		return nil, &domain.InvalidInputError{Field: "cursor", Reason: "invalid cursor"}
+	}
+
+
+	tasks, err := r.repo.List(ctx, ownerID, domain.TaskFilter{
+		Done:     in.Done,
+		BeforeID: in.BeforeID,
+		Limit:    limit + 1,
+	})
+
+
 	if err != nil {
 		return nil, fmt.Errorf("list task: %w", err)
 	} 
 
-	return tasks, nil
+	page := &TaskPage{Items: tasks}
+	if len(tasks) > limit {
+		page.Items = tasks[:limit]
+		next := tasks[limit-1].ID
+		page.NextCursor = &next
+	}
+	return page, nil
 } 
 
 
