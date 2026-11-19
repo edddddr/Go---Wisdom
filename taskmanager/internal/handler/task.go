@@ -13,7 +13,7 @@ import (
 
 type TaskRepository interface{
 	Create(ctx context.Context, ownerID int, in service.CreateInput) (*domain.Task, error)
-	List(ctx context.Context, ownerID int,  f domain.TaskFilter) ([]domain.Task, error)
+	List(ctx context.Context, ownerID int,  in service.ListTasksInput) (*service.TaskPage, error)
 	Get(ctx context.Context, ownerID int, id int) (*domain.Task, error) 
 	Update(ctx context.Context, ownerID int, id int, in service.UpdateInput) (*domain.Task, error)
 	Delete(ctx context.Context, ownerID int, id int) error 
@@ -68,7 +68,7 @@ func (h *TaskHandler)  Create(c *gin.Context){
 
 
 func (h *TaskHandler) List(c *gin.Context){
-	var filter domain.TaskFilter 
+	var in service.ListTasksInput
 
 	if done, ok := c.GetQuery("done"); ok {
 		v, err := strconv.ParseBool(done)
@@ -77,17 +77,37 @@ func (h *TaskHandler) List(c *gin.Context){
 				fieldError{Field: "done", Issue: "must be true or false"})
 			return
 		}
-		filter.Done = &v
+		in.Done = &v
 	}
 
-	tasks, err := h.serv.List(c.Request.Context(), currentUserID(c),filter)
+	if raw, ok := c.GetQuery("limit"); ok {
+		v, err := strconv.Atoi(raw)
+		if err != nil {
+			writeError(c, http.StatusBadRequest, "invalid_query", "invalid query parameter",
+				fieldError{Field: "limit", Issue: "must be an integer"})
+			return
+		}
+		in.Limit = &v
+	}
+
+	if raw, ok := c.GetQuery("cursor"); ok {
+		v, err := strconv.Atoi(raw)
+		if err != nil {
+			writeError(c, http.StatusBadRequest, "invalid_query", "invalid query parameter",
+				fieldError{Field: "cursor", Issue: "must be an integer"})
+			return
+		}
+		in.BeforeID = &v
+	}
+
+	page, err := h.serv.List(c.Request.Context(), currentUserID(c), in)
 
 	if err != nil{
 		respondError(c, err)
 		return	
 	}
 
-	c.JSON(http.StatusOK, tasks)
+	c.JSON(http.StatusOK, gin.H{"items": page.Items, "next_cursor": page.NextCursor})
 
 }
 
