@@ -22,6 +22,8 @@ import (
 	// "github.com/edddddr/taskmanager/internal/repository/memory"
 	"github.com/edddddr/taskmanager/internal/repository/postgres"
 	"github.com/edddddr/taskmanager/internal/service"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -91,6 +93,10 @@ func run() error{
 		return fmt.Errorf("create router: %w", err)
 	}
 
+
+	
+
+
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           router,
@@ -100,13 +106,19 @@ func run() error{
 		IdleTimeout:       60 * time.Second, 
 	}
 
-	errCh := make(chan error, 1)
-	go func() {
-		slog.Info("server starting", "addr", srv.Addr, "env", cfg.Env)
-		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			errCh <- err
-		}
-	}()
+
+	metricsMux := http.NewServeMux()
+	metricsMux.Handle("/metrics", promhttp.Handler())
+	metricsSrv := &http.Server{
+		Addr:              ":" + cfg.MetricsPort,
+		Handler:           metricsMux,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+
+	errCh := make(chan error, 2)
+	go serve("api", srv, errCh)
+	go serve("metrics", metricsSrv, errCh)
 
 
 	select {
@@ -117,11 +129,22 @@ func run() error{
 	}
 
 	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
+
 	defer cancelShutdown()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
+		_ = srv.Close()
 		return fmt.Errorf("graceful shutdown: %w", err)
 	}
+	
 	slog.Info("server stopped cleanly")
 
 	return nil
+}
+
+
+func serve(name string, srv *http.Server, errCh chan<- error) {
+	slog.Info("server starting", "name", name, "addr", srv.Addr)
+	if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		errCh <- fmt.Errorf("%s: %w", name, err)
+	}
 }
