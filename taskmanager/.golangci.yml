@@ -1,0 +1,13 @@
+version: "2"
+linters:
+  default: standard # govet, staticcheck, errcheck, ineffassign, unused
+  enable:
+    - errorlint # wrong error comparisons/wrapping
+    - gosec # security smells
+    - misspell
+    - unconvert
+    - noctx # HTTP requests without a context
+formatters:
+  enable:
+    - gofmt
+    - goimports
