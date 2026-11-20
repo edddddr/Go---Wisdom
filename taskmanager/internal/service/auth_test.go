@@ -36,6 +36,14 @@ func (f *fakeUserRepo) GetByEmail(ctx context.Context, email string) (*domain.Us
 	return u, nil
 }
 
+func (f *fakeUserRepo) GetEmail(ctx context.Context, email string) (*domain.User, error) {
+	u, ok := f.users[email]
+	if !ok {
+		return nil, domain.ErrNotFound
+	}
+	return u, nil
+}
+
 func newAuthService(t *testing.T) *service.AuthService {
 	t.Helper() // failures are reported at the caller's line, not here
 	svc, err := service.NewAuthService(

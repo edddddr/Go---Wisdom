@@ -30,7 +30,7 @@ func TestTaskService_Create_Priority(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			svc := newService()
 
-			task, err := svc.Create(context.Background(), service.CreateTaskInput{
+			task, err := svc.Create(context.Background(), service.CreateInput{
 				Title:    "write tests",
 				Priority: tc.input,
 			})
@@ -47,7 +47,7 @@ func TestTaskService_Create_Priority(t *testing.T) {
 func TestTaskService_Create_BlankTitle(t *testing.T) {
 	svc := newService()
 
-	_, err := svc.Create(context.Background(), service.CreateTaskInput{Title: "   "})
+	_, err := svc.Create(context.Background(), service.CreateInput{Title: "   "})
 
 	if !errors.Is(err, domain.ErrInvalidInput) {
 		t.Errorf("err = %v, want ErrInvalidInput", err)
@@ -57,7 +57,7 @@ func TestTaskService_Create_BlankTitle(t *testing.T) {
 func TestTaskService_Get_NotFound(t *testing.T) {
 	svc := newService()
 
-	_, err := svc.Get(context.Background(), 999)
+	_, err := svc.Get(context.Background(), )
 
 	if !errors.Is(err, domain.ErrNotFound) {
 		t.Errorf("err = %v, want ErrNotFound", err)

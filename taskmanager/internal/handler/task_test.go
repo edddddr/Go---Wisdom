@@ -70,7 +70,7 @@ func (f *fakeTaskService) Get(ctx context.Context, ownerID, id int) (*domain.Tas
 	return f.getFn(ctx, ownerID, id)
 }
 
-func (f *fakeTaskService) List(context.Context, int, domain.TaskFilter) ([]domain.Task, error) {
+func (f *fakeTaskService) List(context.Context, int, service.ListTasksInput) (*service.TaskPage, error) {
 	f.calls++
 	return nil, errNotImplemented
 }

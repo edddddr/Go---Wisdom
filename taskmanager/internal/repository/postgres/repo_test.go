@@ -152,7 +152,7 @@ func TestUserRepository(t *testing.T) {
 	})
 
 	t.Run("unknown email is not found", func(t *testing.T) {
-		_, err := repo.GetByEmail(ctx, "nobody@example.com")
+		_, err := repo.GetEmail(ctx, "nobody@example.com")
 		if !errors.Is(err, domain.ErrNotFound) {
 			t.Errorf("err = %v, want ErrNotFound", err)
 		}
